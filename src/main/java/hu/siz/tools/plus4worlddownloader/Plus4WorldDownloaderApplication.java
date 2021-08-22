@@ -88,6 +88,6 @@ public class Plus4WorldDownloaderApplication {
         LocalDateTime end = LocalDateTime.now();
         Duration d = Duration.between(start, end);
 
-        System.out.println(String.format("%1d zips extracted; %2d files downloaded in %3d seconds", webCrawler.getFileSaver().getZipsExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds()));
+        System.out.printf("%1d zips extracted; %2d files downloaded in %3d seconds%n", webCrawler.getFileSaver().getZipsExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
     }
 }
