@@ -21,7 +21,7 @@ public class FileSaver extends AbstractLoggingUtility {
         } else if (url.endsWith(".zip")) {
             saveZip(url);
         } else {
-            quiet("Skipping " + url);
+            verbose("Skipping " + url);
         }
     }
 
