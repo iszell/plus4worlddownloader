@@ -8,7 +8,7 @@ import java.nio.file.FileSystems;
 public class FileNameTools extends AbstractLoggingUtility {
 
     private static final String DIRSEPARATOR = FileSystems.getDefault().getSeparator();
-    private static final String[] SUPPORTED_EXTENSIONS = {".prg", ".tap", ".d64"};
+    private static final String[] SUPPORTED_EXTENSIONS = {".prg", ".tap", ".seq", ".d64"};
 
     public String getRawFileName(String url) {
         return url.substring(url.lastIndexOf("/") + 1);
@@ -50,6 +50,7 @@ public class FileNameTools extends AbstractLoggingUtility {
                 return true;
             }
         }
-        return false;
+        // handle file names without extension
+        return !getRawFileName(name).contains(".");
     }
 }
