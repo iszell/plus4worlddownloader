@@ -111,13 +111,16 @@ public class FileSaver extends AbstractLoggingUtility {
             verbose("Skipping existing file " + extracted);
         } else {
             log("Extracting file " + extracted);
-            FileOutputStream fos = new FileOutputStream(extracted);
-            int len;
-            byte[] buffer = new byte[16384];
-            while ((len = zip.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
+            try (FileOutputStream fos = new FileOutputStream(extracted)) {
+                int len;
+                byte[] buffer = new byte[16384];
+                while ((len = zip.read(buffer)) > 0) {
+                    fos.write(buffer, 0, len);
+                }
+            } catch (IOException e) {
+                extracted.delete();
+                throw new IOException(e);
             }
-            fos.close();
         }
     }
 
