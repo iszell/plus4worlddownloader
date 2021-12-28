@@ -2,11 +2,12 @@ package hu.siz.tools.plus4worlddownloader.file;
 
 import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.http.client.fluent.Request;
 
 import java.io.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class FileSaver extends AbstractLoggingUtility {
 
@@ -56,7 +57,7 @@ public class FileSaver extends AbstractLoggingUtility {
     private void saveZip(String url) {
         verbose("Downloading zip " + url);
         File z = null;
-        ZipInputStream zip = null;
+        ArchiveInputStream zip = null;
         try {
             if (Plus4WorldDownloaderApplication.saveZips) {
                 String directory = fileNameTools.getDirectoryFor(url);
@@ -70,17 +71,16 @@ public class FileSaver extends AbstractLoggingUtility {
                 z = File.createTempFile("p4wd_", null);
             }
             Request.Get(url).execute().saveContent(z);
-            zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(z)));
-            ZipEntry entry = zip.getNextEntry();
+
+            zip = new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(new FileInputStream(z)));
+            ArchiveEntry entry;
             boolean wasAnyExtracted = false;
-            while (entry != null) {
+            while ((entry = zip.getNextEntry()) != null) {
                 if (entry.isDirectory()) {
                     verbose("Ignoring zip directory entry in " + url);
                 } else if (fileNameTools.isFileSupported(entry.getName())) {
                     wasAnyExtracted |= extractZipEntry(url, zip, entry);
                 }
-                zip.closeEntry();
-                entry = zip.getNextEntry();
             }
             zip.close();
             zipsChecked++;
@@ -105,7 +105,7 @@ public class FileSaver extends AbstractLoggingUtility {
 
     }
 
-    private boolean extractZipEntry(String url, ZipInputStream zip, ZipEntry entry) throws IOException {
+    private boolean extractZipEntry(String url, ArchiveInputStream zip, ArchiveEntry entry) throws IOException {
         String directory = fileNameTools.getDirectoryFor(url);
         File d = new File(directory);
         if (!d.exists()) {
