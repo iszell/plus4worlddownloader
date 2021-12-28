@@ -10,9 +10,19 @@ import java.io.IOException;
 
 public class WebCrawler extends AbstractLoggingUtility {
 
-    private FileSaver fileSaver = new FileSaver();
+    private final FileSaver fileSaver;
+    private final String url;
 
-    public void crawl(String url) {
+    public WebCrawler(String url, String targetDir) {
+        this.fileSaver = new FileSaver(url, targetDir);
+        this.url = url;
+    }
+
+    public void crawl() {
+        crawl(url);
+    }
+
+    private void crawl(String url) {
         verbose("Reading from source URL " + url);
 
         try {
@@ -26,7 +36,7 @@ public class WebCrawler extends AbstractLoggingUtility {
     private void processPage(Element e) {
         verbose("Processing element " + e.html());
         String href = e.attributes().get("href");
-        if (href != null) {
+        if (href.trim().length() > 0) {
             String absUrl = e.absUrl("href");
             if (href.length() == 1 || href.startsWith("/") || href.startsWith("?")) {
                 verbose("Skipping " + href);

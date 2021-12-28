@@ -8,29 +8,25 @@ import java.time.LocalDateTime;
 
 public class Plus4WorldDownloaderApplication {
 
-    public static final String FORCEDOWNLOAD = "-forcedownload";
-    public static final String QUIET = "-quiet";
-    public static final String VERBOSE = "-verbose";
-    public static final String TARGETDIR = "-targetdir=";
-    public static final String HELP = "-help";
-    public static final String NORENAME = "-norename";
-    public static final String URL = "-url=";
-    public static final String SAVEZIPS = "-savezips";
+    private static final String FORCEDOWNLOAD = "-forcedownload";
+    private static final String QUIET = "-quiet";
+    private static final String VERBOSE = "-verbose";
+    private static final String TARGETDIR = "-targetdir=";
+    private static final String HELP = "-help";
+    private static final String NORENAME = "-norename";
+    private static final String URL = "-url=";
+    private static final String SAVEZIPS = "-savezips";
 
-    public static String sourceUrl = "http://plus4.othersi.de/plus4";
-    public static String targetDir = null;
     public static boolean commodoreNaming = true;
     public static boolean verbose = false;
     public static boolean quiet = false;
     public static boolean forceDownload = false;
     public static boolean saveZips = false;
 
-    private static WebCrawler webCrawler = new WebCrawler();
+    private static String sourceUrl = "http://plus4.othersi.de/plus4";
+    private static String targetDir = null;
 
-    public static void main(String[] args) {
-        System.out.println("Plus/4 World mirror downloader");
-
-        LocalDateTime start = LocalDateTime.now();
+    private static void processCommandLineArgs(String[] args) {
         for (String arg : args) {
             if (FORCEDOWNLOAD.equalsIgnoreCase(arg)) {
                 forceDownload = true;
@@ -66,6 +62,14 @@ public class Plus4WorldDownloaderApplication {
                 System.out.println(TARGETDIR + "<download target dir>");
             }
         }
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Plus/4 World mirror downloader");
+
+        LocalDateTime start = LocalDateTime.now();
+
+        processCommandLineArgs(args);
 
         if (targetDir == null) {
             System.err.println("-targetdir= option is mandatory");
@@ -83,11 +87,19 @@ public class Plus4WorldDownloaderApplication {
             }
         }
 
-        webCrawler.crawl(sourceUrl);
+        var webCrawler = new WebCrawler(sourceUrl, targetDir);
+
+        webCrawler.crawl();
 
         LocalDateTime end = LocalDateTime.now();
         Duration d = Duration.between(start, end);
 
-        System.out.printf("%1d zips extracted; %2d files downloaded in %3d seconds%n", webCrawler.getFileSaver().getZipsExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
+        System.out.printf("%1d zips checked, %2d zips extracted; %3d files downloaded in %4d seconds%n",
+                webCrawler.getFileSaver().getZipsChecked(),
+                webCrawler.getFileSaver().getZipsExtracted(),
+                webCrawler.getFileSaver().getFilesSaved(),
+                d.getSeconds());
+        System.out.printf("Unhandled extensions found: %1s%n", String.join(", ",
+                webCrawler.getFileSaver().getFileNameTools().getExtensionsFound()));
     }
 }

@@ -4,11 +4,24 @@ import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
 
 import java.nio.file.FileSystems;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class FileNameTools extends AbstractLoggingUtility {
 
-    private static final String DIRSEPARATOR = FileSystems.getDefault().getSeparator();
-    private static final String[] SUPPORTED_EXTENSIONS = {".prg", ".tap", ".seq", ".d64"};
+    private static final String DIR_SEPARATOR = FileSystems.getDefault().getSeparator();
+    private static final List<String> SUPPORTED_EXTENSIONS = List.of("bin", "crt", "d64", "d71", "d81", "g64", "mid", "prg", "rom", "seq", "sid", "tap");
+    private static final List<String> IGNORED_EXTENSIONS = List.of("bat", "bmp", "exe", "gif", "java", "jpg", "mp3", "mp4", "mpeg", "pdf", "txt", "wav", "xls");
+    private final Set<String> extensionsFound = new HashSet<>();
+
+    private final String sourceUrl;
+    private final String targetDir;
+
+    public FileNameTools(String sourceUrl, String targetDir) {
+        this.sourceUrl = sourceUrl;
+        this.targetDir = targetDir;
+    }
 
     public String getRawFileName(String url) {
         return url.substring(url.lastIndexOf("/") + 1);
@@ -33,24 +46,32 @@ public class FileNameTools extends AbstractLoggingUtility {
     }
 
     public String getDirectoryFor(String url) {
-        String dirNames = url.substring(Plus4WorldDownloaderApplication.sourceUrl.length()).toLowerCase();
+        String dirNames = url.substring(sourceUrl.length()).toLowerCase();
         dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));
         StringBuilder sb = new StringBuilder();
-        for (String dirName : dirNames.split("\\/")) {
+        for (String dirName : dirNames.split("/")) {
             sb.append(convertFileName(dirName, true));
-            sb.append(DIRSEPARATOR);
+            sb.append(DIR_SEPARATOR);
         }
-        return Plus4WorldDownloaderApplication.targetDir.concat(sb.toString());
+        return targetDir.concat(sb.toString());
     }
 
     public boolean isFileSupported(String name) {
         String lowerCaseName = name.toLowerCase();
-        for (String extension : SUPPORTED_EXTENSIONS) {
-            if (lowerCaseName.endsWith(extension)) {
-                return true;
-            }
+        int dotLocation = lowerCaseName.lastIndexOf('.');
+        if (dotLocation < 0) {
+            return true;
         }
-        // handle file names without extension
-        return !getRawFileName(name).contains(".");
+        String extension = lowerCaseName.substring(dotLocation + 1);
+        if (SUPPORTED_EXTENSIONS.contains(extension)) {
+            return true;
+        } else if (!IGNORED_EXTENSIONS.contains(extension)) {
+            extensionsFound.add(extension);
+        }
+        return false;
+    }
+
+    public Set<String> getExtensionsFound() {
+        return extensionsFound;
     }
 }

@@ -10,16 +10,21 @@ import java.util.zip.ZipInputStream;
 
 public class FileSaver extends AbstractLoggingUtility {
 
-    private final FileNameTools fileNameTools = new FileNameTools();
+    private final FileNameTools fileNameTools;
 
     private long filesSaved = 0;
     private long zipsExtracted = 0;
+    private long zipsChecked = 0;
+
+    public FileSaver(String sourceUrl, String targetDir) {
+        this.fileNameTools = new FileNameTools(sourceUrl, targetDir);
+    }
 
     public void downloadFile(String url) {
-        if (fileNameTools.isFileSupported(url)) {
-            saveFile(url);
-        } else if (url.endsWith(".zip")) {
+        if (url.endsWith(".zip")) {
             saveZip(url);
+        } else if (fileNameTools.isFileSupported(url)) {
+            saveFile(url);
         } else {
             verbose("Skipping " + url);
         }
@@ -28,11 +33,9 @@ public class FileSaver extends AbstractLoggingUtility {
     private void saveFile(String url) {
         String directory = fileNameTools.getDirectoryFor(url);
         File d = new File(directory);
-        if (!d.exists()) {
-            if (!d.mkdirs()) {
-                System.err.println("Error creating directory " + d);
-                return;
-            }
+        if (!d.exists() && !d.mkdirs()) {
+            System.err.println("Error creating directory " + d);
+            return;
         }
         String fileName = fileNameTools.convertFileName(fileNameTools.getRawFileName(url), false);
         File f = new File(directory, fileName);
@@ -69,21 +72,23 @@ public class FileSaver extends AbstractLoggingUtility {
             Request.Get(url).execute().saveContent(z);
             zip = new ZipInputStream(new BufferedInputStream(new FileInputStream(z)));
             ZipEntry entry = zip.getNextEntry();
+            boolean wasAnyExtracted = false;
             while (entry != null) {
-                if (fileNameTools.isFileSupported(entry.getName())) {
-                    if (entry.isDirectory()) {
-                        System.err.println("Zip directory in " + url);
-                    } else {
-                        extractZipEntry(url, zip, entry);
-                    }
+                if (entry.isDirectory()) {
+                    verbose("Ignoring zip directory entry in " + url);
+                } else if (fileNameTools.isFileSupported(entry.getName())) {
+                    wasAnyExtracted |= extractZipEntry(url, zip, entry);
                 }
-
                 zip.closeEntry();
                 entry = zip.getNextEntry();
             }
             zip.close();
-            zipsExtracted++;
-        } catch (Exception e) {
+            zipsChecked++;
+            if (wasAnyExtracted) {
+                zipsExtracted++;
+            }
+        } catch (
+                Exception e) {
             System.err.println("Error processing zip " + url + ": " + e.getMessage());
         } finally {
             if (zip != null) {
@@ -97,9 +102,10 @@ public class FileSaver extends AbstractLoggingUtility {
                 z.delete();
             }
         }
+
     }
 
-    private void extractZipEntry(String url, ZipInputStream zip, ZipEntry entry) throws IOException {
+    private boolean extractZipEntry(String url, ZipInputStream zip, ZipEntry entry) throws IOException {
         String directory = fileNameTools.getDirectoryFor(url);
         File d = new File(directory);
         if (!d.exists()) {
@@ -117,11 +123,13 @@ public class FileSaver extends AbstractLoggingUtility {
                 while ((len = zip.read(buffer)) > 0) {
                     fos.write(buffer, 0, len);
                 }
+                return true;
             } catch (IOException e) {
                 extracted.delete();
                 throw new IOException(e);
             }
         }
+        return false;
     }
 
     public long getFilesSaved() {
@@ -132,4 +140,11 @@ public class FileSaver extends AbstractLoggingUtility {
         return zipsExtracted;
     }
 
+    public long getZipsChecked() {
+        return zipsChecked;
+    }
+
+    public FileNameTools getFileNameTools() {
+        return fileNameTools;
+    }
 }
