@@ -47,7 +47,11 @@ public class FileNameTools extends AbstractLoggingUtility {
 
     public String getDirectoryFor(String url) {
         String dirNames = url.substring(sourceUrl.length()).toLowerCase();
-        dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));
+        if (url.endsWith(".zip") && Plus4WorldDownloaderApplication.createZipDirs) {
+            dirNames = dirNames.substring(0, dirNames.lastIndexOf("."));
+        } else {
+            dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));
+        }
         StringBuilder sb = new StringBuilder();
         for (String dirName : dirNames.split("/")) {
             sb.append(convertFileName(dirName, true));
