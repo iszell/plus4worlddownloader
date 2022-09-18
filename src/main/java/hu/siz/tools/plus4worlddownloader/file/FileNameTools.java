@@ -2,6 +2,7 @@ package hu.siz.tools.plus4worlddownloader.file;
 
 import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
+import hu.siz.tools.plus4worlddownloader.utils.CommandLineOption;
 
 import java.nio.file.FileSystems;
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class FileNameTools extends AbstractLoggingUtility {
     }
 
     public String convertFileName(String name, boolean isDirectory) {
-        if (!Plus4WorldDownloaderApplication.commodoreNaming) {
+        if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.NO_RENAME)) {
             return name;
         }
 
@@ -47,7 +48,7 @@ public class FileNameTools extends AbstractLoggingUtility {
 
     public String getDirectoryFor(String url) {
         String dirNames = url.substring(sourceUrl.length()).toLowerCase();
-        if (url.endsWith(".zip") && Plus4WorldDownloaderApplication.createZipDirs) {
+        if (url.endsWith(".zip") && Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.ZIP_AS_DIRECTORY)) {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("."));
         } else {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));

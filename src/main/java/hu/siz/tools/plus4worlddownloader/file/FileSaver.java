@@ -2,6 +2,7 @@ package hu.siz.tools.plus4worlddownloader.file;
 
 import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
+import hu.siz.tools.plus4worlddownloader.utils.CommandLineOption;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -40,7 +41,7 @@ public class FileSaver extends AbstractLoggingUtility {
         }
         String fileName = fileNameTools.convertFileName(fileNameTools.getRawFileName(url), false);
         File f = new File(directory, fileName);
-        if (f.exists() && !Plus4WorldDownloaderApplication.forceDownload) {
+        if (f.exists() && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.FORCE_DOWNLOAD)) {
             verbose("Skipping existing file " + f);
             return;
         }
@@ -59,7 +60,7 @@ public class FileSaver extends AbstractLoggingUtility {
         File z = null;
         ArchiveInputStream zip = null;
         try {
-            if (Plus4WorldDownloaderApplication.saveZips) {
+            if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ZIPS)) {
                 String directory = fileNameTools.getDirectoryFor(url);
                 String fileName = fileNameTools.getRawFileName(url);
                 z = new File(directory, fileName);
@@ -98,7 +99,7 @@ public class FileSaver extends AbstractLoggingUtility {
                     System.err.println("Error closing zip " + e.getMessage());
                 }
             }
-            if (z != null && !Plus4WorldDownloaderApplication.saveZips) {
+            if (z != null && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ZIPS)) {
                 z.delete();
             }
         }
@@ -113,7 +114,7 @@ public class FileSaver extends AbstractLoggingUtility {
         }
         String fileName = fileNameTools.convertFileName(fileNameTools.getRawFileName(entry.getName()), false);
         File extracted = new File(directory, fileName);
-        if (extracted.exists() && !Plus4WorldDownloaderApplication.forceDownload) {
+        if (extracted.exists() && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.FORCE_DOWNLOAD)) {
             verbose("Skipping existing file " + extracted);
         } else {
             log("Extracting file " + extracted);

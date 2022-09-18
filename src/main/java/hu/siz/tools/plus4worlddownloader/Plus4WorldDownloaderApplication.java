@@ -3,71 +3,66 @@ package hu.siz.tools.plus4worlddownloader;
 import hu.siz.tools.plus4worlddownloader.utils.CommandLineOption;
 import hu.siz.tools.plus4worlddownloader.web.WebCrawler;
 
+import javax.swing.plaf.basic.BasicArrowButton;
 import java.nio.file.FileSystems;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import static hu.siz.tools.plus4worlddownloader.utils.CommandLineOption.*;
 
 public class Plus4WorldDownloaderApplication {
 
-    public static boolean commodoreNaming = true;
-    public static boolean verbose = false;
-    public static boolean quiet = false;
-    public static boolean forceDownload = false;
-    public static boolean saveZips = false;
-    public static boolean createZipDirs = true;
+    private static Map<CommandLineOption, Object> options = new HashMap<>();
 
-    private static String sourceUrl = "http://plus4.othersi.de/plus4";
-    private static String targetDir = null;
+    static {
+        Arrays.stream(CommandLineOption.values())
+                .forEach(opt -> {
+                    options.put(opt, opt.getDefaultValue());
+                });
+    }
 
     private static void processCommandLineArgs(String[] args) {
         Arrays.stream(args)
                 .forEach(arg -> {
-                    if (FORCE_DOWNLOAD.getOption().equalsIgnoreCase(arg)) {
-                        forceDownload = true;
+                    var successfullyProcessed = false;
+                    if ('-' == arg.charAt(0)) {
+                        successfullyProcessed = processOption(arg);
                     }
-                    if (QUIET.getOption().equalsIgnoreCase(arg)) {
-                        verbose = false;
-                        quiet = true;
-                    }
-                    if (VERBOSE.getOption().equalsIgnoreCase(arg)) {
-                        verbose = true;
-                        quiet = false;
-                    }
-                    if (NO_RENAME.getOption().equalsIgnoreCase(arg)) {
-                        commodoreNaming = false;
-                    }
-                    if (SAVE_ZIPS.getOption().equalsIgnoreCase(arg)) {
-                        saveZips = true;
-                    }
-                    if (ZIP_AS_DIRECTORY.getOption().equalsIgnoreCase(arg)) {
-                        createZipDirs = false;
-                    }
-                    if (arg.toLowerCase(Locale.ROOT).startsWith(TARGET_DIR.getOption().toLowerCase(Locale.ROOT))) {
-                        targetDir = arg.substring(TARGET_DIR.getOption().length());
-                    }
-                    if (arg.toLowerCase(Locale.ROOT).startsWith(URL.getOption())) {
-                        sourceUrl = arg.substring(URL.getOption().length());
-                    }
-                    if (HELP.getOption().equalsIgnoreCase(arg)) {
-                        System.out.print("Usage: java -jar <jarname> ");
-                        Arrays.stream(values())
-                                .forEach(opt -> {
-                                    if (!opt.isMandatory()) {
-                                        System.out.print('[');
-                                    }
-                                    System.out.print(opt.getOption());
-                                    if (!opt.isMandatory()) {
-                                        System.out.print(']');
-                                    }
-                                    System.out.print(' ');
-                                });
-                        System.out.println();
+                    if (!successfullyProcessed) {
+                        System.out.println("Unknown option " + arg);
                     }
                 });
+    }
+
+    private static boolean processOption(String arg) {
+        boolean isString = arg.contains("=");
+        var optString = isString ? arg.substring(1, arg.indexOf('=') + 1) : arg.substring(1);
+        var opt = Arrays.stream(CommandLineOption.values())
+                .filter(option -> option.getOption().equalsIgnoreCase(optString))
+                .findAny()
+                .orElse(null);
+        if (opt == null) {
+            return false;
+        }
+        if (isString) {
+            options.put(opt, arg.substring(arg.indexOf("=") + 1));
+        } else {
+            options.put(opt, !(Boolean) opt.getDefaultValue());
+        }
+
+        return true;
+    }
+
+    public static boolean getBooleanOption(CommandLineOption option) {
+        return (boolean) options.get(option);
+    }
+
+    public static String getStringOption(CommandLineOption option) {
+        return (String) options.get(option);
     }
 
     public static void main(String[] args) {
@@ -77,7 +72,8 @@ public class Plus4WorldDownloaderApplication {
 
         processCommandLineArgs(args);
 
-        if (targetDir == null) {
+        String targetDir = getStringOption(TARGET_DIR);
+        if (targetDir == null || targetDir.length() == 0) {
             System.err.println("-targetdir= option is mandatory");
             return;
         }
@@ -86,9 +82,11 @@ public class Plus4WorldDownloaderApplication {
             targetDir = targetDir.concat(FileSystems.getDefault().getSeparator());
         }
 
-        if (verbose) {
+        var sourceUrl = getStringOption(URL);
+
+        if (getBooleanOption(VERBOSE)) {
             System.out.println("Downloading from " + sourceUrl + " to " + targetDir);
-            if (commodoreNaming) {
+            if (!getBooleanOption(NO_RENAME)) {
                 System.out.println("Renaming downloaded files to 16 characters");
             }
         }

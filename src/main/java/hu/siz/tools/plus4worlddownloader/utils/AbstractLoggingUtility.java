@@ -4,7 +4,7 @@ import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 
 public abstract class AbstractLoggingUtility {
     protected void quiet(String msg) {
-        if (!Plus4WorldDownloaderApplication.quiet) {
+        if (!Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.QUIET)) {
             System.out.println(msg);
         }
     }
@@ -14,7 +14,7 @@ public abstract class AbstractLoggingUtility {
     }
 
     protected void verbose(String msg) {
-        if (Plus4WorldDownloaderApplication.verbose) {
+        if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.VERBOSE)) {
             System.out.println(msg);
         }
     }
