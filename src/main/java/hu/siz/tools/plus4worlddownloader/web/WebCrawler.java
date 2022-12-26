@@ -13,7 +13,7 @@ public class WebCrawler extends AbstractLoggingUtility {
     private final FileSaver fileSaver;
     private final String url;
 
-    public WebCrawler(String url, String targetDir) {
+    public WebCrawler(String url, String targetDir) throws IOException {
         this.fileSaver = new FileSaver(url, targetDir);
         this.url = url;
     }

@@ -2,6 +2,8 @@ package hu.siz.tools.plus4worlddownloader.file;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,7 +22,7 @@ class FileNameToolsTest {
     }
 
     @Test
-    void isFileSupported() {
+    void isFileSupported() throws IOException {
         var fileNameTools = new FileNameTools(null, null);
 
         assertTrue(fileNameTools.isFileSupported("proba/proba"));

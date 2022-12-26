@@ -4,24 +4,28 @@ import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
 import hu.siz.tools.plus4worlddownloader.utils.CommandLineOption;
 
+import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class FileNameTools extends AbstractLoggingUtility {
 
     private static final String DIR_SEPARATOR = FileSystems.getDefault().getSeparator();
-    private static final List<String> SUPPORTED_EXTENSIONS = List.of("bin", "crt", "d64", "d71", "d81", "g64", "mid", "prg", "rom", "seq", "sid", "tap");
-    private static final List<String> IGNORED_EXTENSIONS = List.of("bat", "bmp", "exe", "gif", "java", "jpg", "mp3", "mp4", "mpeg", "pdf", "txt", "wav", "xls");
-    private final Set<String> extensionsFound = new HashSet<>();
+    private final Set<String> SUPPORTED_EXTENSIONS;
+    private final Set<String> IGNORED_EXTENSIONS;
+    private final Set<String> extensionsFound = new TreeSet<>();
 
     private final String sourceUrl;
     private final String targetDir;
 
-    public FileNameTools(String sourceUrl, String targetDir) {
+    public FileNameTools(String sourceUrl, String targetDir) throws IOException {
         this.sourceUrl = sourceUrl;
         this.targetDir = targetDir;
+
+        Properties fileExtensions = new Properties();
+        fileExtensions.load(Plus4WorldDownloaderApplication.class.getResourceAsStream("/fileextensions.properties"));
+        SUPPORTED_EXTENSIONS = Set.of(fileExtensions.getProperty("supported").split(","));
+        IGNORED_EXTENSIONS = Set.of(fileExtensions.getProperty("ignored").split(","));
     }
 
     public String getRawFileName(String url) {
@@ -48,7 +52,7 @@ public class FileNameTools extends AbstractLoggingUtility {
 
     public String getDirectoryFor(String url) {
         String dirNames = url.substring(sourceUrl.length()).toLowerCase();
-        if (url.endsWith(".zip") && Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.ZIP_AS_DIRECTORY)) {
+        if (url.endsWith(".zip") && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.DONT_CREATE_ZIP_DIRECTORY)) {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("."));
         } else {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));
@@ -71,6 +75,7 @@ public class FileNameTools extends AbstractLoggingUtility {
         if (SUPPORTED_EXTENSIONS.contains(extension)) {
             return true;
         } else if (!IGNORED_EXTENSIONS.contains(extension)) {
+            log(String.format("Unknown extension %1s for name %2s%n", extension, name));
             extensionsFound.add(extension);
         }
         return false;

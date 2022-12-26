@@ -18,7 +18,7 @@ public class FileSaver extends AbstractLoggingUtility {
     private long zipsExtracted = 0;
     private long zipsChecked = 0;
 
-    public FileSaver(String sourceUrl, String targetDir) {
+    public FileSaver(String sourceUrl, String targetDir) throws IOException {
         this.fileNameTools = new FileNameTools(sourceUrl, targetDir);
     }
 
