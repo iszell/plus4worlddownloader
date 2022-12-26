@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static hu.siz.tools.plus4worlddownloader.utils.CommandLineOption.*;
 
@@ -131,8 +128,10 @@ public class Plus4WorldDownloaderApplication {
                 Duration d = Duration.between(start, end);
 
                 System.out.printf("%1d zips checked, %2d zips extracted; %3d files downloaded in %4d seconds%n", webCrawler.getFileSaver().getZipsChecked(), webCrawler.getFileSaver().getZipsExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
-                System.out.printf("Unhandled extensions found: %1s%n", String.join(", ", webCrawler.getFileSaver().getFileNameTools().getExtensionsFound()));
-
+                var extensionsFound = webCrawler.getFileSaver().getFileNameTools().getExtensionsFound();
+                if(!extensionsFound.isEmpty()) {
+                    System.out.printf("Unhandled extensions found: %1s%n", String.join(", ", extensionsFound));
+                }
             } catch (IOException e) {
                 System.err.print("Can't initialize application");
             }
