@@ -75,7 +75,7 @@ public class FileNameTools extends AbstractLoggingUtility {
         if (SUPPORTED_EXTENSIONS.contains(extension)) {
             return true;
         } else if (!IGNORED_EXTENSIONS.contains(extension)) {
-            log(String.format("Unknown extension %1s for name %2s%n", extension, name));
+            log(String.format("Unknown extension %1s for name %2s", extension, name));
             extensionsFound.add(extension);
         }
         return false;
