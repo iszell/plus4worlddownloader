@@ -3,6 +3,7 @@ package hu.siz.tools.plus4worlddownloader.file;
 import hu.siz.tools.plus4worlddownloader.Plus4WorldDownloaderApplication;
 import hu.siz.tools.plus4worlddownloader.utils.AbstractLoggingUtility;
 import hu.siz.tools.plus4worlddownloader.utils.CommandLineOption;
+import org.apache.commons.codec.CharEncoding;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -73,7 +74,7 @@ public class FileSaver extends AbstractLoggingUtility {
             }
             Request.Get(url).execute().saveContent(z);
 
-            zip = new ArchiveStreamFactory().createArchiveInputStream(new BufferedInputStream(new FileInputStream(z)));
+            zip = new ArchiveStreamFactory(CharEncoding.ISO_8859_1).createArchiveInputStream(new BufferedInputStream(new FileInputStream(z)));
             ArchiveEntry entry;
             boolean wasAnyExtracted = false;
             while ((entry = zip.getNextEntry()) != null) {
