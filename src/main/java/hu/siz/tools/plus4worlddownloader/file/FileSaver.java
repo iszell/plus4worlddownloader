@@ -16,16 +16,16 @@ public class FileSaver extends AbstractLoggingUtility {
     private final FileNameTools fileNameTools;
 
     private long filesSaved = 0;
-    private long zipsExtracted = 0;
-    private long zipsChecked = 0;
+    private long archivesExtracted = 0;
+    private long archivesChecked = 0;
 
     public FileSaver(String sourceUrl, String targetDir) throws IOException {
         this.fileNameTools = new FileNameTools(sourceUrl, targetDir);
     }
 
     public void downloadFile(String url) {
-        if (url.endsWith(".zip")) {
-            saveZip(url);
+        if (url.endsWith(".zip") || url.endsWith(".7z")) {
+            saveArchive(url);
         } else if (fileNameTools.isFileSupported(url)) {
             saveFile(url);
         } else {
@@ -56,58 +56,58 @@ public class FileSaver extends AbstractLoggingUtility {
         }
     }
 
-    private void saveZip(String url) {
-        verbose("Downloading zip " + url);
-        File z = null;
-        ArchiveInputStream zip = null;
+    private void saveArchive(String url) {
+        verbose("Downloading archive " + url);
+        File a = null;
+        ArchiveInputStream archive = null;
         try {
-            if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ZIPS)) {
+            if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ARCHIVES)) {
                 String directory = fileNameTools.getDirectoryFor(url);
                 String fileName = fileNameTools.getRawFileName(url);
-                z = new File(directory, fileName);
-                if (z.exists()) {
-                    verbose("Skipping existing zip " + url);
+                a = new File(directory, fileName);
+                if (a.exists()) {
+                    verbose("Skipping existing archive " + url);
                     return;
                 }
             } else {
-                z = File.createTempFile("p4wd_", null);
+                a = File.createTempFile("p4wd_", null);
             }
-            Request.Get(url).execute().saveContent(z);
+            Request.Get(url).execute().saveContent(a);
 
-            zip = new ArchiveStreamFactory(CharEncoding.ISO_8859_1).createArchiveInputStream(new BufferedInputStream(new FileInputStream(z)));
+            archive = new ArchiveStreamFactory(CharEncoding.ISO_8859_1).createArchiveInputStream(new BufferedInputStream(new FileInputStream(a)));
             ArchiveEntry entry;
             boolean wasAnyExtracted = false;
-            while ((entry = zip.getNextEntry()) != null) {
+            while ((entry = archive.getNextEntry()) != null) {
                 if (entry.isDirectory()) {
-                    verbose("Ignoring zip directory entry in " + url);
+                    verbose("Ignoring archive directory entry in " + url);
                 } else if (fileNameTools.isFileSupported(entry.getName())) {
-                    wasAnyExtracted |= extractZipEntry(url, zip, entry);
+                    wasAnyExtracted |= extractArchiveEntry(url, archive, entry);
                 }
             }
-            zip.close();
-            zipsChecked++;
+            archive.close();
+            archivesChecked++;
             if (wasAnyExtracted) {
-                zipsExtracted++;
+                archivesExtracted++;
             }
         } catch (
                 Exception e) {
-            System.err.println("Error processing zip " + url + ": " + e.getMessage());
+            System.err.println("Error processing archive " + url + ": " + e.getMessage());
         } finally {
-            if (zip != null) {
+            if (archive != null) {
                 try {
-                    zip.close();
+                    archive.close();
                 } catch (IOException e) {
-                    System.err.println("Error closing zip " + e.getMessage());
+                    System.err.println("Error closing archive " + e.getMessage());
                 }
             }
-            if (z != null && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ZIPS)) {
-                z.delete();
+            if (a != null && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ARCHIVES)) {
+                a.delete();
             }
         }
 
     }
 
-    private boolean extractZipEntry(String url, ArchiveInputStream zip, ArchiveEntry entry) throws IOException {
+    private boolean extractArchiveEntry(String url, ArchiveInputStream archive, ArchiveEntry entry) throws IOException {
         String directory = fileNameTools.getDirectoryFor(url);
         File d = new File(directory);
         if (!d.exists()) {
@@ -122,7 +122,7 @@ public class FileSaver extends AbstractLoggingUtility {
             try (FileOutputStream fos = new FileOutputStream(extracted)) {
                 int len;
                 byte[] buffer = new byte[16384];
-                while ((len = zip.read(buffer)) > 0) {
+                while ((len = archive.read(buffer)) > 0) {
                     fos.write(buffer, 0, len);
                 }
                 return true;
@@ -138,12 +138,12 @@ public class FileSaver extends AbstractLoggingUtility {
         return filesSaved;
     }
 
-    public long getZipsExtracted() {
-        return zipsExtracted;
+    public long getArchivesExtracted() {
+        return archivesExtracted;
     }
 
-    public long getZipsChecked() {
-        return zipsChecked;
+    public long getArchivesChecked() {
+        return archivesChecked;
     }
 
     public FileNameTools getFileNameTools() {

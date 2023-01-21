@@ -10,8 +10,8 @@ public enum CommandLineOption {
     VERBOSE("verbose", false, "Detailed informational messages are printed", false),
     FORCE_DOWNLOAD("forceDownload", false, "Force re-download of existing files", false),
     NO_RENAME("noRename", false, "Do not rename downloaded files and directories to fit 16 characters (for emulator warriors)", false),
-    SAVE_ZIPS("saveZips", false, "Save zips too (they are always extracted as well)", false),
-    DONT_CREATE_ZIP_DIRECTORY("noZipDir", false, "Do not create directories for zip contents", false),
+    SAVE_ARCHIVES("saveArchives", false, "Save archives too (they are always extracted as well)", false),
+    DONT_CREATE_ARCHIVE_DIRECTORY("noArchiveDir", false, "Do not create directories for archive contents", false),
     URL("url=", false, "Source URL to start crawling", "http://plus4.othersi.de/plus4"),
     TARGET_DIR("targetDir=", true, "Root directory for downloads", null);
 

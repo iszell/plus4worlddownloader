@@ -127,7 +127,7 @@ public class Plus4WorldDownloaderApplication {
                 LocalDateTime end = LocalDateTime.now();
                 Duration d = Duration.between(start, end);
 
-                System.out.printf("%1d zips checked, %2d zips extracted; %3d files downloaded in %4d seconds%n", webCrawler.getFileSaver().getZipsChecked(), webCrawler.getFileSaver().getZipsExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
+                System.out.printf("%1d archives checked, %2d archives extracted; %3d files downloaded in %4d seconds%n", webCrawler.getFileSaver().getArchivesChecked(), webCrawler.getFileSaver().getArchivesExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
                 var extensionsFound = webCrawler.getFileSaver().getFileNameTools().getExtensionsFound();
                 if(!extensionsFound.isEmpty()) {
                     System.out.printf("Unhandled extensions found: %1s%n", String.join(", ", extensionsFound));
