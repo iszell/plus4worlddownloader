@@ -37,8 +37,16 @@ public class FileNameTools extends AbstractLoggingUtility {
             return name;
         }
 
-        String fileName = isDirectory ? name : name.substring(0, name.length() - 4);
-        String result = fileName.toLowerCase().replace("_", "");
+        String extension = isDirectory ? "" : name.substring(name.lastIndexOf('.') + 1);
+        String fileName = isDirectory ? name : name.substring(0, name.length() - extension.length() - 1);
+        String result = fileName.toLowerCase();
+        if (extension.isEmpty() || extension.charAt(0) != 'd') {
+            result = result.replace("_", " ");
+        }
+        if (result.length() > 16) {
+            result = result.replace("_", "");
+            verbose("Name too long, removing spaces: " + name + "->" + result);
+        }
         if (result.length() > 16) {
             result = result.replace("(", "").replace(")", "");
             verbose("Name still too long, replacing parentheses for URL " + name + "->" + result);
@@ -47,7 +55,8 @@ public class FileNameTools extends AbstractLoggingUtility {
             result = result.substring(0, 16);
             verbose("Name still too long, truncating for URL " + name + "->" + result);
         }
-        return isDirectory ? result : result.concat(name.substring(name.length() - 4));
+        result = result.trim();
+        return isDirectory ? result : result.concat(name.substring(name.length() - extension.length() - 1));
     }
 
     public String getDirectoryFor(String url) {
