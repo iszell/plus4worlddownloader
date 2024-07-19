@@ -37,8 +37,9 @@ public class FileNameTools extends AbstractLoggingUtility {
             return name;
         }
 
-        String extension = isDirectory ? "" : name.substring(name.lastIndexOf('.') + 1);
-        String fileName = isDirectory ? name : name.substring(0, name.length() - extension.length() - 1);
+        String extension = isDirectory || name.startsWith(".") ? "" : name.substring(name.lastIndexOf('.') + 1);
+        String fileName = isDirectory || name.length() <= extension.length() ?
+                name : name.substring(0, name.length() - extension.length() - 1);
         String result = fileName.toLowerCase();
         if (extension.isEmpty() || extension.charAt(0) != 'd') {
             result = result.replace("_", " ");
@@ -49,20 +50,21 @@ public class FileNameTools extends AbstractLoggingUtility {
         }
         if (result.length() > 16) {
             result = result.replace("(", "").replace(")", "");
-            verbose("Name still too long, replacing parentheses for URL " + name + "->" + result);
+            verbose("Name still too long, removing parentheses for URL " + name + "->" + result);
         }
         if (result.length() > 16) {
             result = result.substring(0, 16);
             verbose("Name still too long, truncating for URL " + name + "->" + result);
         }
         result = result.trim();
-        return isDirectory ? result : result.concat(name.substring(name.length() - extension.length() - 1));
+
+        return isDirectory || name.length() <= extension.length() ?
+                result : result.concat(name.substring(name.length() - extension.length() - 1));
     }
 
     public String getDirectoryFor(String url) {
         String dirNames = url.substring(sourceUrl.length()).toLowerCase();
-        if ((url.endsWith(".zip") || url.endsWith(".7z"))
-                && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.DONT_CREATE_ARCHIVE_DIRECTORY)) {
+        if ((url.endsWith(".zip") || url.endsWith(".7z")) && !Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.DONT_CREATE_ARCHIVE_DIRECTORY)) {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("."));
         } else {
             dirNames = dirNames.substring(0, dirNames.lastIndexOf("/"));
