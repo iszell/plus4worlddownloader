@@ -18,9 +18,11 @@ public class FileSaver extends AbstractLoggingUtility {
     private long filesSaved = 0;
     private long archivesExtracted = 0;
     private long archivesChecked = 0;
+    private final int timeout;
 
-    public FileSaver(String sourceUrl, String targetDir) throws IOException {
+    public FileSaver(String sourceUrl, String targetDir, int timeout) throws IOException {
         this.fileNameTools = new FileNameTools(sourceUrl, targetDir);
+        this.timeout = timeout;
     }
 
     public void downloadFile(String url) {
@@ -49,7 +51,12 @@ public class FileSaver extends AbstractLoggingUtility {
         log("Downloading file " + f);
 
         try {
-            Request.Get(url).execute().saveContent(f);
+            Request
+                    .Get(url)
+                    .connectTimeout(timeout * 1000)
+                    .socketTimeout(timeout * 1000)
+                    .execute()
+                    .saveContent(f);
             filesSaved++;
         } catch (IOException e) {
             System.err.println("Failed to download from url " + url + ": " + e.getMessage());
@@ -72,9 +79,15 @@ public class FileSaver extends AbstractLoggingUtility {
             } else {
                 a = File.createTempFile("p4wd_", null);
             }
-            Request.Get(url).execute().saveContent(a);
+            Request
+                    .Get(url)
+                    .connectTimeout(timeout * 1000)
+                    .socketTimeout(timeout * 1000)
+                    .execute()
+                    .saveContent(a);
 
-            archive = new ArchiveStreamFactory(CharEncoding.ISO_8859_1).createArchiveInputStream(new BufferedInputStream(new FileInputStream(a)));
+            archive = new ArchiveStreamFactory(CharEncoding.ISO_8859_1)
+                    .createArchiveInputStream(new BufferedInputStream(new FileInputStream(a)));
             ArchiveEntry entry;
             boolean wasAnyExtracted = false;
             while ((entry = archive.getNextEntry()) != null) {

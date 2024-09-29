@@ -12,10 +12,12 @@ public class WebCrawler extends AbstractLoggingUtility {
 
     private final FileSaver fileSaver;
     private final String url;
+    private final int timeout;
 
-    public WebCrawler(String url, String targetDir) throws IOException {
-        this.fileSaver = new FileSaver(url, targetDir);
+    public WebCrawler(String url, String targetDir, int timeout) throws IOException {
+        this.fileSaver = new FileSaver(url, targetDir, timeout);
         this.url = url;
+        this.timeout = timeout;
     }
 
     public void crawl() {
@@ -26,7 +28,7 @@ public class WebCrawler extends AbstractLoggingUtility {
         verbose("Reading from source URL " + url);
 
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url).timeout(timeout * 1000).get();
             doc.select("a").forEach(this::processPage);
         } catch (IOException e) {
             e.printStackTrace();

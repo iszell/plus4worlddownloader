@@ -88,6 +88,10 @@ public class Plus4WorldDownloaderApplication {
         return (boolean) options.get(option);
     }
 
+    public static int getIntOption(CommandLineOption option) {
+        return Integer.parseInt(getStringOption(option));
+    }
+
     public static String getStringOption(CommandLineOption option) {
         return (String) options.get(option);
     }
@@ -120,7 +124,7 @@ public class Plus4WorldDownloaderApplication {
 
             WebCrawler webCrawler = null;
             try {
-                webCrawler = new WebCrawler(sourceUrl, targetDir);
+                webCrawler = new WebCrawler(sourceUrl, targetDir, getIntOption(MAX_TIMEOUT));
 
                 webCrawler.crawl();
 
@@ -129,7 +133,7 @@ public class Plus4WorldDownloaderApplication {
 
                 System.out.printf("%1d archives checked, %2d archives extracted; %3d files downloaded in %4d seconds%n", webCrawler.getFileSaver().getArchivesChecked(), webCrawler.getFileSaver().getArchivesExtracted(), webCrawler.getFileSaver().getFilesSaved(), d.getSeconds());
                 var extensionsFound = webCrawler.getFileSaver().getFileNameTools().getExtensionsFound();
-                if(!extensionsFound.isEmpty()) {
+                if (!extensionsFound.isEmpty()) {
                     System.out.printf("Unhandled extensions found: %1s%n", String.join(", ", extensionsFound));
                 }
             } catch (IOException e) {

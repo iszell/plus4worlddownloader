@@ -9,6 +9,7 @@ public enum CommandLineOption {
     QUIET("quiet", false, "Only error messages are printed", false),
     VERBOSE("verbose", false, "Detailed informational messages are printed", false),
     FORCE_DOWNLOAD("forceDownload", false, "Force re-download of existing files", false),
+    MAX_TIMEOUT("maxTimeout=", false, "Maximum time to wait for files to be downloaded", "30"),
     NO_RENAME("noRename", false, "Do not rename downloaded files and directories to fit 16 characters (for emulator warriors)", false),
     SAVE_ARCHIVES("saveArchives", false, "Save archives too (they are always extracted as well)", false),
     DONT_CREATE_ARCHIVE_DIRECTORY("noArchiveDir", false, "Do not create directories for archive contents", false),
