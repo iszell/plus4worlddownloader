@@ -13,6 +13,8 @@ public class FileNameTools extends AbstractLoggingUtility {
     private static final String DIR_SEPARATOR = FileSystems.getDefault().getSeparator();
     private final Set<String> SUPPORTED_EXTENSIONS;
     private final Set<String> IGNORED_EXTENSIONS;
+    private final Set<String> SUPPORTED_PREFIXES;
+    private final Set<String> IGNORED_PREFIXES;
     private final Set<String> extensionsFound = new TreeSet<>();
 
     private final String sourceUrl;
@@ -26,6 +28,11 @@ public class FileNameTools extends AbstractLoggingUtility {
         fileExtensions.load(Plus4WorldDownloaderApplication.class.getResourceAsStream("/fileextensions.properties"));
         SUPPORTED_EXTENSIONS = Set.of(fileExtensions.getProperty("supported").split(","));
         IGNORED_EXTENSIONS = Set.of(fileExtensions.getProperty("ignored").split(","));
+
+        Properties filePrefixes = new Properties();
+        filePrefixes.load(Plus4WorldDownloaderApplication.class.getResourceAsStream("/fileprefixes.properties"));
+        SUPPORTED_PREFIXES = Set.of(filePrefixes.getProperty("supported").split(","));
+        IGNORED_PREFIXES = Set.of(filePrefixes.getProperty("ignored").split(","));
     }
 
     public String getRawFileName(String url) {
@@ -79,12 +86,17 @@ public class FileNameTools extends AbstractLoggingUtility {
 
     public boolean isFileSupported(String name) {
         String lowerCaseName = name.toLowerCase();
-        int dotLocation = lowerCaseName.lastIndexOf('.');
-        if (dotLocation < 0) {
+        int extensionDotLocation = lowerCaseName.lastIndexOf('.');
+        if (extensionDotLocation < 0) {
             return true;
         }
-        String extension = lowerCaseName.substring(dotLocation + 1);
-        if (SUPPORTED_EXTENSIONS.contains(extension)) {
+        int prefixDotLocation = lowerCaseName.indexOf('.');
+        if (prefixDotLocation < 0) {
+            return true;
+        }
+        String extension = lowerCaseName.substring(extensionDotLocation + 1);
+        String prefix = lowerCaseName.substring(0, prefixDotLocation);
+        if (SUPPORTED_EXTENSIONS.contains(extension) || SUPPORTED_PREFIXES.contains(prefix)) {
             return true;
         } else if (!IGNORED_EXTENSIONS.contains(extension)) {
             log(String.format("Unknown extension %1s for name %2s", extension, name));
