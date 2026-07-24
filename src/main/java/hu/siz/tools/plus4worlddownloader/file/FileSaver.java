@@ -66,7 +66,7 @@ public class FileSaver extends AbstractLoggingUtility {
     private void saveArchive(String url) {
         verbose("Downloading archive " + url);
         File a = null;
-        ArchiveInputStream archive = null;
+        ArchiveInputStream<?> archive = null;
         try {
             if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ARCHIVES)) {
                 String directory = fileNameTools.getDirectoryFor(url);
@@ -120,7 +120,7 @@ public class FileSaver extends AbstractLoggingUtility {
 
     }
 
-    private boolean extractArchiveEntry(String url, ArchiveInputStream archive, ArchiveEntry entry) throws IOException {
+    private boolean extractArchiveEntry(String url, ArchiveInputStream<?> archive, ArchiveEntry entry) throws IOException {
         String directory = fileNameTools.getDirectoryFor(url);
         File d = new File(directory);
         if (!d.exists()) {

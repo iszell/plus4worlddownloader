@@ -38,7 +38,7 @@ public class WebCrawler extends AbstractLoggingUtility {
     private void processPage(Element e) {
         verbose("Processing element " + e.html());
         String href = e.attributes().get("href");
-        if (href.trim().length() > 0) {
+        if (!href.trim().isEmpty()) {
             String absUrl = e.absUrl("href");
             if (href.length() == 1 || href.startsWith("/") || href.startsWith("?")) {
                 verbose("Skipping " + href);

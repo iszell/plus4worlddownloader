@@ -104,7 +104,7 @@ public class Plus4WorldDownloaderApplication {
         if (processCommandLineArgs(args)) {
 
             String targetDir = getStringOption(TARGET_DIR);
-            if (targetDir == null || targetDir.length() == 0) {
+            if (targetDir == null || targetDir.isEmpty()) {
                 System.err.println("-targetdir= option is mandatory");
                 return;
             }
@@ -122,7 +122,7 @@ public class Plus4WorldDownloaderApplication {
                 }
             }
 
-            WebCrawler webCrawler = null;
+            WebCrawler webCrawler;
             try {
                 webCrawler = new WebCrawler(sourceUrl, targetDir, getIntOption(MAX_TIMEOUT));
 
