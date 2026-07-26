@@ -70,6 +70,10 @@ public class FileSaver extends AbstractLoggingUtility {
         try {
             if (Plus4WorldDownloaderApplication.getBooleanOption(CommandLineOption.SAVE_ARCHIVES)) {
                 String directory = fileNameTools.getDirectoryFor(url);
+                File d = new File(directory);
+                if (!d.exists()) {
+                    d.mkdirs();
+                }
                 String fileName = fileNameTools.getRawFileName(url);
                 a = new File(directory, fileName);
                 if (a.exists()) {
